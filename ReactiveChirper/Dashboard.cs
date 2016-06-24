@@ -45,7 +45,7 @@ namespace ReactiveChirper
             this.logger = providerRuntime.GetLogger("Dashboard");
 
             var router = new Router();
-            new DashboardController(router, TaskScheduler.Current,  providerRuntime);
+            new ReactiveChirpController(router, TaskScheduler.Current,  providerRuntime);
 
             var options = new StartOptions
             {
@@ -66,8 +66,9 @@ namespace ReactiveChirper
 
             this.logger.Verbose($"Chirper listening on {options.Port}");
 
-            var dashboardGrain = providerRuntime.GrainFactory.GetGrain<IDashboardGrain>(0);
-            return dashboardGrain.Init();
+            //var dashboardGrain = providerRuntime.GrainFactory.GetGrain<IDashboardGrain>(0);
+            //return dashboardGrain.Init();
+            return TaskDone.Done;
         }
     }
 }

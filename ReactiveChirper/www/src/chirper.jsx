@@ -1,65 +1,63 @@
-var http = require('./lib/http');
+var $ = require('jquery');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var routie = require('./lib/routie');
-var events = require('eventthing');
+var events = require('./lib/events');
 
 var Login = require('./components/Login.jsx');
 var User = require('./components/User.jsx');
 var ThemeButtons = require('./components/theme-buttons.jsx');
 
-var timer;
-
 var DomContainer = document.getElementById('content');
 
 ReactDOM.render(<ThemeButtons/>, document.getElementById('button-toggles-content'));
 
-// continually poll the timeline
-function loadDashboardCounters(){
-    http.get('/timeline', function(err, data){
-        dashboardCounters = data;
-        events.emit('timeline', data);
-    });
-}
-//setInterval(loadDashboardCounters, 5000);
-//loadDashboardCounters();
+// TODO: username <-> userName
 
+/* Eventhing */
+events.on('get-timeline', (username) =>
+    $.get('/timeline/' + username, (timeline) => {
+        console.log("got new timeline");
+        console.log(timeline);
+        events.emit('timeline', timeline);
+    }, "json"));
 
-function renderLoading(){
-    ReactDOM.render(<span>Loading...</span>, DomContainer);
-}
+events.on('get-followers', (username) =>
+    $.get('/followers/' + username, (followers) => {
+        events.emit('followers', followers);
+    }, "json"));
 
-function resetPull() {
-    events.clearAll();
-    clearInterval(timer);
-}
+events.on('follow', (username, toFollow) => {
+    console.log("following");
+    console.log({ username, toFollow });
+    $.post('/follow', { username: username, toFollow: toFollow }, (followers) => {
+        events.emit('get-followers', username);
+        events.emit('get-timeline', username);
+    }, "json")
+});
 
+events.on('new-message', (username, text) => {
+    console.log("sending message");
+    $.post('/message/new', { username, text }, (data) => {
+        console.log("message posted");
+        console.log(data);
+        // get the new timeline to incorporate the new post
+        events.emit('get-timeline', username);
+    }, "json")
+});
+
+/* Routing */
+// Login
 routie('', function () {
     console.log("loading login page");
-    resetPull();
     React.render(<Login />, DomContainer);
-
-    //var render = function(){
-    //    React.render(<Login />, DOMcontainer);
-    //}
-
-    // events.on('dashboard-counters', render);
-
-    //loadDashboardCounters();
 });
 
-
-
+// User page (timeline/followers)
 routie('/user/:username', function (username) {
     console.log("arrived at user page for " + username);
-    resetPull();
-    ReactDOM.render(<User username={username} />, DomContainer);
-
-        // http.get('/HistoricalStats/' + host, function(err, data) {
-
-    //timer = setInterval(loadData, 5000);
-
-    //loadData();
+    ReactDOM.render(<User userName={username } />, DomContainer);
 });
 
+// Go to login page
 routie('');

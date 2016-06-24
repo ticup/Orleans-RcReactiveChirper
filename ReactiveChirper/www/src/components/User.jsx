@@ -3,22 +3,23 @@ var ReactDOM = require('react-dom');
 var routie = require('../lib/routie');
 
 var Timeline = require('./Timeline.jsx');
-var PostMessage = require('./PostMessage.jsx');
+var NewMessage = require('./NewMessage.jsx');
 var FollowerList = require('./FollowerList.jsx');
 var NewFollower = require('./NewFollower.jsx');
+
 
 module.exports = React.createClass({
 
     render: function () {
         return <div className="container-fluid">
            <div className="row">
-               <div className="col-md-9">
-                    <Timeline username={this.props.username}/>
-                    <PostMessage username={this.props.username} />
+               <div className="col-sm-9">
+                    <Timeline userName={this.props.userName} getTimeline={this.props.getTimeline} />
+                    <NewMessage userName={this.props.userName} />
                </div>
-                <div className="col-md-3">
-                    <FollowerList username={this.props.username} />
-                    <NewFollower username={this.props.username} />
+                <div className="col-sm-3">
+                    <FollowerList userName={this.props.userName} />
+                    <NewFollower userName={this.props.userName} />
                 </div>
             </div>
            

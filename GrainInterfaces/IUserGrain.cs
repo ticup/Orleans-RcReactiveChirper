@@ -9,12 +9,12 @@ namespace GrainInterfaces
     /// </summary>
 	public interface IUserGrain : IGrainWithStringKey
     {
-        Task FollowUserName(string userName);
-        Task UnfollowUserName(string userName);
-
         Task<List<string>> GetFollowersList();
         Task<List<Message>> GetMessages(int amount);
         Task<Timeline> GetTimeline(int amount);
-        Task<bool> PostText(string text);
+
+        Task Follow(string userName);
+        Task Unfollow(string userName);
+        Task<bool> PostText(string text);  
     }
 }

@@ -27,14 +27,14 @@ namespace Grains
 
 
 
-        public Task FollowUserName(string userName)
+        public Task Follow(string userName)
         {
             //IUserGrain userGrain = GrainClient.GrainFactory.GetGrain<IUserGrain>(userName);
             State.Subscriptions.Add(userName);
             return WriteStateAsync();
         }
 
-        public Task UnfollowUserName(string userName)
+        public Task Unfollow(string userName)
         {
             State.Subscriptions.Remove(userName);
             return WriteStateAsync();
@@ -116,7 +116,7 @@ namespace Grains
             List<Task<List<Message>>> tasks = new List<Task<List<Message>>>();
             foreach (string UserName in State.Subscriptions)
             {
-                UserGrain user = GrainFactory.GetGrain<UserGrain>(UserName);
+                IUserGrain user = GrainFactory.GetGrain<IUserGrain>(UserName);
                 tasks.Add(user.GetMessages(limit));
             }
             List<Message>[] MsgsByUser = await Task.WhenAll(tasks);

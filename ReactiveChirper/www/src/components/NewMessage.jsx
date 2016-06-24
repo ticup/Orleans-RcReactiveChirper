@@ -1,6 +1,7 @@
 ﻿var React = require('react');
 var ReactDOM = require('react-dom');
 var routie = require('../lib/routie');
+var events = require('../lib/events');
 var $ = require('jquery');
 
 module.exports = React.createClass({
@@ -9,11 +10,7 @@ module.exports = React.createClass({
         e.preventDefault();
         var msg = ReactDOM.findDOMNode(this.refs.newMessageInput).value;
         console.log("posting " + msg);
-        $.post("/message/new", { username: this.props.username, text: msg }, (data) => {
-            console.log("message posted");
-            console.log(data);
-        }, "json");
-        // todo: retrieve timeline from data and update Timeline
+        events.emit('new-message',this.props.userName, msg);
     },
 
     render: function () {

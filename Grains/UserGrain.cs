@@ -12,7 +12,7 @@ namespace Grains
     public class UserGrainState
     {
         
-        public List<string> Subscriptions { get; set; }
+        public HashSet<string> Subscriptions { get; set; }
         public List<IMessageChunkGrain> MessageChunks { get; set; }
        
     }
@@ -42,7 +42,7 @@ namespace Grains
 
         public Task<List<string>> GetFollowersList()
         {
-            return Task.FromResult(State.Subscriptions);
+            return Task.FromResult(State.Subscriptions.ToList());
         }
 
         public async Task<List<Message>> GetMessages(int amount)
@@ -87,7 +87,7 @@ namespace Grains
             }
             if (State.Subscriptions == null)
             {
-                State.Subscriptions = new List<string>();
+                State.Subscriptions = new HashSet<string>();
             }
 
             Name = this.GetPrimaryKeyString();

@@ -19,10 +19,12 @@ module.exports = React.createClass({
     },
 
     componentDidMount: function () {
+        this.setTimeline = (timeline) => this.setState(timeline);
+
         var getTimeline = () => events.emit('get-timeline', this.props.userName);
 
         timer = setInterval(getTimeline, PULL_INTERVAL);
-        events.on('timeline', (timeline) => this.setState(timeline));
+        events.on('timeline', this.setTimeline);
 
         getTimeline();
     },
@@ -31,17 +33,25 @@ module.exports = React.createClass({
         if (timer) {
             clearInterval(timer);
         }
-        events.removeListener('timeline', setTimeline);
+
+        events.removeListener('timeline', this.setTimeline);
     },
 
     render: function () {
         var posts = this.state.posts.map((post) =>
-            <li className="list-group-item" key={post.messageId }>
+            <li className="list-group-item" key={post.messageId}>
                 [{formatDate(post.timestamp)}] {post.userName} : {post.text}
             </li>);
 
-        return <ul>
-            {posts}
-        </ul>
+        return (
+            <div>
+                <h2>
+                    Your Timeline
+                </h2>
+                <ul className="list-group">
+                    {posts}
+                </ul>
+            </div>
+        );
     }
 });

@@ -40,6 +40,12 @@ module.exports = React.createClass({
                 {followerName}
             </li>);
 
-        return <ul>{followers}</ul>
+        return (
+            <div>
+                <h2>Subscriptions</h2>
+                <ul>{followers}</ul>
+           </div>
+        );
+           
     }
 });

@@ -22,6 +22,13 @@ events.on('get-timeline', (username) =>
         events.emit('timeline', timeline);
     }, "json"));
 
+var timelineListener = (timeline) => {
+
+};
+events.emit('get-timeline', 'sebastian');
+events.on('timeline', timelineListener);
+events.removeListener('timeline', timelineListener)
+
 events.on('get-followers', (username) =>
     $.get('/followers/' + username, (followers) => {
         events.emit('followers', followers);
@@ -50,13 +57,13 @@ events.on('new-message', (username, text) => {
 // Login
 routie('', function () {
     console.log("loading login page");
-    React.render(<Login />, DomContainer);
+    ReactDOM.render(<Login />, DomContainer);
 });
 
 // User page (timeline/followers)
 routie('/user/:username', function (username) {
     console.log("arrived at user page for " + username);
-    ReactDOM.render(<User userName={username } />, DomContainer);
+    ReactDOM.render(<User userName={username} />, DomContainer);
 });
 
 // Go to login page

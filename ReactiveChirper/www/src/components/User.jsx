@@ -14,7 +14,7 @@ module.exports = React.createClass({
         return <div className="container-fluid">
            <div className="row">
                <div className="col-sm-9">
-                    <Timeline userName={this.props.userName} getTimeline={this.props.getTimeline} />
+                    <Timeline userName={this.props.userName} />
                     <NewMessage userName={this.props.userName} />
                </div>
                 <div className="col-sm-3">

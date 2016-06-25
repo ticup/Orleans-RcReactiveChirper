@@ -17,13 +17,24 @@ namespace Grains
     [StorageProvider(ProviderName = "MemoryStore")]
     class MessageChunkGrain : Grain<MessageChunkGrainState>, IMessageChunkGrain
     {
-        public static int MessageChunkSize = 10;
+        public static double MessageChunkSize = 10;
+
+
 
         public Task<List<Message>> getMessages()
         {
             return Task.FromResult(State.Msgs);
         }
 
+
+        /// <summary>
+        /// Add a message to the MessageList.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns>
+        /// False if the message could not be added because the list was full,
+        /// True otherwise.
+        /// </returns>
         public async Task<bool> AddMessage(Message message)
         {
             if (State.Msgs.Count > MessageChunkSize)
@@ -34,6 +45,8 @@ namespace Grains
             await WriteStateAsync();
             return true;
         }
+
+
 
         public override Task OnActivateAsync()
         {

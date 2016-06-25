@@ -53,8 +53,6 @@
   <ItemGroup>
     <Compile Include="IMessageChunkGrain.cs" />
     <Compile Include="Message.cs" />
-    <Compile Include="NewMessageResponse.cs" />
-    <Compile Include="Query.cs" />
     <Compile Include="Timeline.cs" />
     <Compile Include="UserInfo.cs" />
     <Compile Include="IUserGrain.cs" />

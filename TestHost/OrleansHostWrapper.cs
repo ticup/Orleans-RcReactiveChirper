@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Orleans.Runtime.Host;
 using System.Reflection;
 using System.IO;
-using ReactiveChirper;
+using WebServer;
 using Orleans.Runtime.Configuration;
 using System.Collections.Generic;
 
@@ -35,7 +35,7 @@ namespace TestHost
                 Dictionary<string, string> opts = new Dictionary<string, string>();
                 opts.Add("Port", "8080");
                 siloHost.InitializeOrleansSilo();
-                siloHost.Config.Globals.RegisterBootstrapProvider<Dashboard>("Dashboard", opts);
+                siloHost.Config.Globals.RegisterBootstrapProvider<Main>("Main", opts);
                 siloHost.Config.AddMemoryStorageProvider();
 
                 ok = siloHost.StartOrleansSilo();

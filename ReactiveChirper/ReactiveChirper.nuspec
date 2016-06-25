@@ -7,11 +7,11 @@
     <authors>$author$</authors>
     <owners>$author$</owners>
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
-    <projectUrl>https://github.com/OrleansContrib/OrleansDashboard</projectUrl>
+    <projectUrl>https://github.com/OrleansContrib/ReactiveChirper</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
     <copyright>Copyright 2016</copyright>
-    <tags>orleans dashboard metrics monitor</tags>
+    <tags>Social Feed (twitter)</tags>
   </metadata>
 </package>

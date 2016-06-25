@@ -11,12 +11,10 @@ namespace Grains
 
     public class UserGrainState
     {
-        
         public HashSet<string> Subscriptions { get; set; }
-        public List<IMessageChunkGrain> MessageChunks { get; set; }
+        public int ChunkNumber { get; set; }
        
     }
-
 
 
     [StorageProvider(ProviderName = "MemoryStore")]
@@ -26,45 +24,55 @@ namespace Grains
         public string Name { get; set; }
 
 
-
+        /// <summary>
+        /// Add given user to the subscription list
+        /// </summary>
         public Task Follow(string userName)
         {
-            //IUserGrain userGrain = GrainClient.GrainFactory.GetGrain<IUserGrain>(userName);
             State.Subscriptions.Add(userName);
             return WriteStateAsync();
         }
 
+
+        /// <summary>
+        /// Remove given user from the subscription list
+        /// </summary>
         public Task Unfollow(string userName)
         {
             State.Subscriptions.Remove(userName);
             return WriteStateAsync();
         }
 
+
+        /// <summary>
+        /// Get the Users this user is subscribed to
+        /// </summary>
         public Task<List<string>> GetFollowersList()
         {
             return Task.FromResult(State.Subscriptions.ToList());
         }
 
-        public async Task<List<Message>> GetMessages(int amount)
+
+        /// <summary>
+        ///  Get range amount of messages posted by this user
+        /// </summary>
+        public async Task<List<Message>> GetMessages(int range)
         {
-            // There is a possibility of caching x number of chunks in here too.
-            int NoChunks = (int)Math.Ceiling((double) (amount / MessageChunkGrain.MessageChunkSize));
-            int Cur = 0;
-            List<Task<List<Message>>> tasks = new List<Task<List<Message>>>();
-            List<Message> FlatMsgs = new List<Message>();
-            foreach (IMessageChunkGrain c in State.MessageChunks)
-            {
-                if (Cur > NoChunks) break;
-                tasks.Add(c.getMessages());
+            var NoChunks = Math.Ceiling((double)range / MessageChunkGrain.MessageChunkSize);
+            var Tasks = new List<Task<List<Message>>>();
+            for (int i = 0; i <= State.ChunkNumber; i++) {
+                if (i > NoChunks) break;
+                var chunkGrain = GrainFactory.GetGrain<IMessageChunkGrain>(Name + "." + i);
+                Tasks.Add(chunkGrain.getMessages());
             }
-            List<Message>[] Msgs = await Task.WhenAll(tasks);
-            foreach(List<Message> l in Msgs)
-            {
-                FlatMsgs.AddRange(l);
-            }
-            return FlatMsgs;
+            List<Message> Msgs = (await Task.WhenAll(Tasks)).SelectMany(x => x).ToList();
+            return Msgs;
         }
 
+
+        /// <summary>
+        /// Post given text as a message
+        /// </summary>
         public async Task<bool> PostText(string text)
         {
             //  add the message to the current chunk
@@ -77,55 +85,66 @@ namespace Grains
             return await CurrentChunk.AddMessage(msg);
         }
 
+
+        /// <summary>
+        /// Get messages from all the user its subscriptions,
+        /// combine them with its own messages,
+        /// sort by timestamp and return the first limit number.
+        /// </summary>
+        public async Task<Timeline> GetTimeline(int limit)
+        {
+            // i) request a number of messages from each subscription
+            var Tasks = State.Subscriptions.Select(UserName =>
+            {
+                IUserGrain user = GrainFactory.GetGrain<IUserGrain>(UserName);
+                return user.GetMessages(limit);
+            }).ToList();
+
+            // ii) request your own messages
+            Tasks.Add(GetMessages(limit));
+
+            // iii) await for all the messages and flatten them
+            List<Message> Msgs = (await Task.WhenAll(Tasks)).SelectMany((x) => x).ToList();
+
+            // iv) order by Timestamp and take the first <limit> messages
+            return new Timeline(Msgs.OrderBy((m) => m.Timestamp).Take(limit).ToList());
+        }
+
+
+        /// <summary>
+        /// "Create" a new chunk, by increment the ChunkNumber
+        /// </summary>
+        /// <returns></returns>
+        private Task AddChunk()
+        {
+            State.ChunkNumber++;
+            SetCurrentChunk();
+            return WriteStateAsync();
+        }
+
+
+        /// <summary>
+        ///  Sets the CurrentChunk to the grain instance that belongs to the current ChunkNumber
+        /// </summary>
+        private void SetCurrentChunk()
+        {
+            CurrentChunk = GrainFactory.GetGrain<IMessageChunkGrain>(Name + "." + State.ChunkNumber);
+        }
+
+
         public override Task OnActivateAsync()
         {
             // First time activating this grain instance
-            if (State.MessageChunks == null)
-            {
-                State.MessageChunks = new List<IMessageChunkGrain>();
-                AddChunk();
-            }
             if (State.Subscriptions == null)
             {
                 State.Subscriptions = new HashSet<string>();
             }
 
             Name = this.GetPrimaryKeyString();
-            CurrentChunk = State.MessageChunks[State.MessageChunks.Count - 1];
-
+            SetCurrentChunk();
             return TaskDone.Done;
         }
 
-        private Task AddChunk()
-        {
-            Guid id = Guid.NewGuid();
-            IMessageChunkGrain chunk = GrainFactory.GetGrain<IMessageChunkGrain>(id);
-            State.MessageChunks.Add(chunk);
-            CurrentChunk = chunk;
-            return WriteStateAsync();
-        }
-
-
-
-        // i) gets limit number of messages from every subscription (huge overestimation) and yourself,
-        // ii) sorts them to date and
-        // ii) returns limit number of messages
-        public async Task<Timeline> GetTimeline(int limit)
-        {
-            List<Message> Msgs = new List<Message>();
-            List<Task<List<Message>>> tasks = new List<Task<List<Message>>>();
-            foreach (string UserName in State.Subscriptions)
-            {
-                IUserGrain user = GrainFactory.GetGrain<IUserGrain>(UserName);
-                tasks.Add(user.GetMessages(limit));
-            }
-            List<Message>[] MsgsByUser = await Task.WhenAll(tasks);
-            foreach (List<Message> Umsgs in MsgsByUser)
-            {
-                Msgs.AddRange(Umsgs);
-            }
-            Msgs.AddRange(await GetMessages(limit));
-            return new Timeline(Msgs.OrderBy((m) => m.Timestamp).Take(limit).ToList());
-        }
+       
     }
 }

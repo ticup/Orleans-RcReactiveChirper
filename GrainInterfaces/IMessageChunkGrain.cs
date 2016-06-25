@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace GrainInterfaces
 {
-    public interface IMessageChunkGrain : Orleans.IGrainWithGuidKey
+    public interface IMessageChunkGrain : Orleans.IGrainWithStringKey
     {
-        [Query]
         Task<List<Message>> getMessages();
 
         Task<bool> AddMessage(Message message);

@@ -1,12 +1,9 @@
 using System.Threading.Tasks;
 using Orleans;
 using System.Collections.Generic;
-
+using System;
 namespace GrainInterfaces
-{
-    /// <summary>
-    /// Grain interface IUserGrain
-    /// </summary>
+{ 
 	public interface IUserGrain : IGrainWithStringKey
     {
         Task<List<string>> GetFollowersList();
@@ -14,7 +11,6 @@ namespace GrainInterfaces
         Task<Timeline> GetTimeline(int amount);
 
         Task Follow(string userName);
-        Task Unfollow(string userName);
-        Task<bool> PostText(string text);  
+        Task<bool> PostText(string text);
     }
 }

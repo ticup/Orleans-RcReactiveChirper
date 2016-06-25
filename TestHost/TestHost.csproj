@@ -128,9 +128,9 @@
       <Project>{75de5d06-6d73-45bc-82ba-a8be2503f722}</Project>
       <Name>Grains</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ReactiveChirper\OrleansDashboard.csproj">
+    <ProjectReference Include="..\ReactiveChirper\WebServer.csproj">
       <Project>{6c5584e7-78a0-417d-b5c0-bf49bcf5b3a7}</Project>
-      <Name>OrleansDashboard</Name>
+      <Name>WebServer</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

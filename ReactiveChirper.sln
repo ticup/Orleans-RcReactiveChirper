@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrleansDashboard", "ReactiveChirper\OrleansDashboard.csproj", "{6C5584E7-78A0-417D-B5C0-BF49BCF5B3A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebServer", "ReactiveChirper\WebServer.csproj", "{6C5584E7-78A0-417D-B5C0-BF49BCF5B3A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHost", "TestHost\TestHost.csproj", "{FC8296D3-AB6F-4CF0-9DBC-AFE316660C28}"
 EndProject

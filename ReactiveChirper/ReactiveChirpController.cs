@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using GrainInterfaces;
 
-namespace ReactiveChirper
+namespace WebServer
 {
 
     public class ReactiveChirpController 
@@ -25,6 +25,11 @@ namespace ReactiveChirper
             this.ProviderRuntime = providerRuntime;
 
             Action<string, Func<IOwinContext, IDictionary<string, string>, Task>> add = router.Add;
+
+            // Print out all the files that belong to the assembly
+            // -> These are alle the files that can be returned by the .ReturnFromFile() method.
+            // Add them by right-clicking on the solution -> add new/existing item.
+            // Then click on the new item and go to properties (bottom right) and change "Build Action" to "Embedded Resource"!
             var assembly = Assembly.GetExecutingAssembly();
             foreach (string resourceName in assembly.GetManifestResourceNames())
             {
@@ -32,7 +37,7 @@ namespace ReactiveChirper
             }
 
 
-
+            // Setup routing
             add("/", ChirperPage);
             add("/chirper.min.js", ChirperJs);
 
@@ -40,18 +45,6 @@ namespace ReactiveChirper
             add("/followers/:username", GetFollowers);
             add("/message/new", NewMessage);
             add("/follow", Follow);
-        }
-
-
-
-        Task Index(IOwinContext context, IDictionary<string,string> parameters)
-        {
-            return context.ReturnFile("Index.html", "text/html");
-        }
-
-        Task IndexJs(IOwinContext context, IDictionary<string, string> parameters)
-        {
-            return context.ReturnFile("index.min.js", "application/javascript");
         }
 
 
@@ -94,8 +87,7 @@ namespace ReactiveChirper
                 var grain = this.ProviderRuntime.GrainFactory.GetGrain<IUserGrain>(username);
                 return await grain.PostText(text);
             });
-            NewMessageResponse response = new NewMessageResponse { succeed = result };
-            await context.ReturnJson(response);
+            await context.ReturnJson(new { succeed = result });
         }
 
         // PUT /follow {username, toFollow}
@@ -115,6 +107,8 @@ namespace ReactiveChirper
         }
 
         
+
+        /* Static pages */
         Task ChirperPage(IOwinContext context, IDictionary<string, string> parameters)
         {
             return context.ReturnFile("www.Chirper.html", "text/html");

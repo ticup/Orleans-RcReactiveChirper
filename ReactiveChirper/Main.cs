@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ReactiveChirper
+namespace WebServer
 {
-    public class Dashboard : IBootstrapProvider
+    public class Main : IBootstrapProvider
     {
         IDisposable host;
         Logger logger;
@@ -28,7 +28,7 @@ namespace ReactiveChirper
         {
             get
             {
-                return "Dashboard";
+                return "ReactiveChirper";
             }
         }
 
@@ -42,7 +42,7 @@ namespace ReactiveChirper
 
         public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            this.logger = providerRuntime.GetLogger("Dashboard");
+            this.logger = providerRuntime.GetLogger("ReactiveChirper");
 
             var router = new Router();
             new ReactiveChirpController(router, TaskScheduler.Current,  providerRuntime);
@@ -66,8 +66,7 @@ namespace ReactiveChirper
 
             this.logger.Verbose($"Chirper listening on {options.Port}");
 
-            //var dashboardGrain = providerRuntime.GrainFactory.GetGrain<IDashboardGrain>(0);
-            //return dashboardGrain.Init();
+
             return TaskDone.Done;
         }
     }

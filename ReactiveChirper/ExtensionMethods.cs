@@ -5,7 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace ReactiveChirper
+namespace WebServer
 {
     public static class ExtensionMethods
     {

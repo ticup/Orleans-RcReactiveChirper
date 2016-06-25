@@ -43,7 +43,7 @@ module.exports = React.createClass({
         return (
             <div>
                 <h2>Subscriptions</h2>
-                <ul>{followers}</ul>
+                <ul className="list-group">{followers}</ul>
            </div>
         );
            

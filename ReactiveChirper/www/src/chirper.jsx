@@ -37,7 +37,7 @@ events.on('get-followers', (username) =>
 events.on('follow', (username, toFollow) => {
     console.log("following");
     console.log({ username, toFollow });
-    $.post('/follow', { username: username, toFollow: toFollow }, (followers) => {
+    $.post('/follow', { username, toFollow }, (followers) => {
         events.emit('get-followers', username);
         events.emit('get-timeline', username);
     }, "json")

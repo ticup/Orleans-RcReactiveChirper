@@ -132,7 +132,6 @@
     <None Include="www\src\components\theme-buttons.jsx" />
     <None Include="www\src\components\Timeline.jsx" />
     <None Include="www\src\components\User.jsx" />
-    <None Include="www\src\index.jsx" />
     <None Include="www\src\makefile" />
     <None Include="www\src\package.json" />
   </ItemGroup>

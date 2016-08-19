@@ -1,8 +1,12 @@
-var $ = require('jquery');
+global.jQuery = require('jquery');
+global.$ = global.jQuery;
+var sr = require('./lib/jquery.signalR-2.2.1.min.js');
 var React = require('react');
 var ReactDOM = require('react-dom');
 var routie = require('./lib/routie');
 var events = require('./lib/events');
+
+var WebSocketClient = require('./WebSocketClient.js');
 
 var Login = require('./components/Login.jsx');
 var User = require('./components/User.jsx');
@@ -14,46 +18,7 @@ ReactDOM.render(<ThemeButtons/>, document.getElementById('button-toggles-content
 
 // TODO: username <-> userName
 
-/* Eventhing */
-events.on('get-timeline', (username) =>
-    $.get('/timeline/' + username, (timeline) => {
-        console.log("got new timeline");
-        console.log(timeline);
-        events.emit('timeline', timeline);
-    }, "json"));
-
-var timelineListener = (timeline) => {
-
-};
-events.emit('get-timeline', 'sebastian');
-events.on('timeline', timelineListener);
-events.removeListener('timeline', timelineListener)
-
-events.on('get-followers', (username) =>
-    $.get('/followers/' + username, (followers) => {
-        events.emit('followers', followers);
-    }, "json"));
-
-events.on('follow', (username, toFollow) => {
-    console.log("following");
-    console.log({ username, toFollow });
-    $.post('/follow', { username, toFollow }, (followers) => {
-        events.emit('get-followers', username);
-        events.emit('get-timeline', username);
-    }, "json")
-});
-
-events.on('new-message', (username, text) => {
-    console.log("sending message");
-    $.post('/message/new', { username, text }, (data) => {
-        console.log("message posted");
-        console.log(data);
-        // get the new timeline to incorporate the new post
-        events.emit('get-timeline', username);
-    }, "json")
-});
-
-/* Routing */
+/* UI Routing */
 // Login
 routie('', function () {
     console.log("loading login page");
@@ -64,6 +29,46 @@ routie('', function () {
 routie('/user/:username', function (username) {
     console.log("arrived at user page for " + username);
     ReactDOM.render(<User userName={username} />, DomContainer);
+});
+
+/* Event Handling - Server Interaction */
+//var host = "ws://localhost:8081/ws";
+
+// Declare a proxy to reference the hub.
+//$.connection.hub.url = "http://localhost:8081/signalr";
+var proxy = $.connection.chirperHub;
+var hub = proxy.server;
+
+proxy.client.TimelineResult = (timeline) => events.emit('TimelineResult', timeline);
+
+proxy.client.FollowerResult = (followers) => events.emit('FollowerResult', followers);
+
+connection.start()
+    .done(function () { console.log('Now connected, connection ID=' + connection.id); })
+    .fail(function () { console.log('Could not connect'); });
+
+events.on('TimelineSubscribe', (username) =>
+    hub.TimelineSubscribe(username));
+
+events.on('TimelineUnsubscribe', (username) =>
+    hub.TimelineUnsubscribe(username));
+
+events.on('FollowerSubscribe', (username) =>
+    hub.FollowerSubscribe(username));
+
+events.on('FollowerUnsubscribe', (username) =>
+    hub.FollowerUnsubscribe(username));
+
+
+events.on('Follow', (username, toFollow) => {
+    console.log("following");
+    console.log({ username, toFollow });
+    hub.Follow(Username, ToFollow);
+});
+
+events.on('NewMessage', (username, text) => {
+    console.log("sending message");
+    hub.NewMessage(username, text);
 });
 
 // Go to login page

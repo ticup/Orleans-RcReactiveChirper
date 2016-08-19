@@ -4,9 +4,6 @@ var routie = require('../lib/routie');
 var events = require('../lib/events');
 var $ = require('jquery');
 
-var timer;
-var PULL_INTERVAL = 10000;
-
 function formatDate(dateString) {
     var date = new Date(dateString);
     return date.getHours() + ":" + date.getMinutes();
@@ -19,22 +16,12 @@ module.exports = React.createClass({
     },
 
     componentDidMount: function () {
-        this.setTimeline = (timeline) => this.setState(timeline);
-
-        var getTimeline = () => events.emit('get-timeline', this.props.userName);
-
-        timer = setInterval(getTimeline, PULL_INTERVAL);
-        events.on('timeline', this.setTimeline);
-
-        getTimeline();
+        events.emit('TimelineSubscribe', this.props.userName);
+        events.on('TimelineResult', (timeline) => this.setState(timeline));
     },
 
     componentWillUnmount: function () {
-        if (timer) {
-            clearInterval(timer);
-        }
-
-        events.removeListener('timeline', this.setTimeline);
+        events.emit('TimlineUnsubscribe');
     },
 
     render: function () {

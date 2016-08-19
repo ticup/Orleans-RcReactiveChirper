@@ -4,8 +4,6 @@ var routie = require('../lib/routie');
 var events = require('../lib/events');
 var $ = require('jquery');
 
-var timer;
-var PULL_INTERVAL = 10000;
 
 function formatDate(dateString) {
     var date = new Date(dateString);
@@ -19,19 +17,12 @@ module.exports = React.createClass({
     },
 
     componentDidMount: function () {
-        var getFollowers = () => events.emit('get-followers', this.props.userName);
-
-        timer = setInterval(getFollowers, PULL_INTERVAL);
-        events.on('followers', (followers) => this.setState(followers));
-
-        getFollowers();
+        events.emit('FollowerSubscribe', this.props.userName);
+        events.on('FollowerResult', (followers) => this.setState(followers));
     },
 
     componentWillUnmount: function () {
-        if (timer) {
-            clearInterval(timer);
-        }
-        events.removeListener('followers');
+        events.emit('FollowerUnsubscribe');
     },
 
     render: function () {

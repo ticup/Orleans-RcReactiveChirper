@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Orleans.Runtime.Host;
 using System.Reflection;
 using System.IO;
-using WebServer;
 using Orleans.Runtime.Configuration;
 using System.Collections.Generic;
+using WebServer;
 
 namespace TestHost
 {
@@ -33,7 +33,7 @@ namespace TestHost
             try
             {
                 Dictionary<string, string> opts = new Dictionary<string, string>();
-                opts.Add("Port", "8080");
+                //opts.Add("Port", "8080");
                 siloHost.InitializeOrleansSilo();
                 siloHost.Config.Globals.RegisterBootstrapProvider<Main>("Main", opts);
                 siloHost.Config.AddMemoryStorageProvider();

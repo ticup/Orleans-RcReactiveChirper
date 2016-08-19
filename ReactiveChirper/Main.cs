@@ -1,4 +1,8 @@
-﻿using Microsoft.Owin.Hosting;
+﻿using Fleck;
+using Microsoft.Owin.Hosting;
+using Microsoft.Owin.StaticFiles;
+using Microsoft.Owin.FileSystems;
+using Owin;
 using Orleans;
 using Orleans.Providers;
 using Orleans.Runtime;
@@ -6,8 +10,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Owin;
+using Owin.WebSocket.Extensions;
 
 namespace WebServer
 {
@@ -16,14 +21,7 @@ namespace WebServer
         IDisposable host;
         Logger logger;
 
-        public static int HistoryLength
-        {
-            get
-            {
-                return 25;
-            }
-        }
-
+        // Required by the Orleans silo
         public string Name
         {
             get
@@ -32,41 +30,36 @@ namespace WebServer
             }
         }
 
-
+        // Called by the Orleans silo when it shuts down
         public Task Close()
         {
             host.Dispose();
             return TaskDone.Done;
         }
 
-
+        // Called by the Orleans silo when it starts
         public Task Init(string name, IProviderRuntime providerRuntime, IProviderConfiguration config)
         {
-            this.logger = providerRuntime.GetLogger("ReactiveChirper");
-
-            var router = new Router();
-            new ReactiveChirpController(router, TaskScheduler.Current,  providerRuntime);
+            logger = providerRuntime.GetLogger("ReactiveChirper");
+            ChirperHub.ProviderRuntime = providerRuntime;
+            ChirperHub.TaskScheduler = TaskScheduler.Current;
 
             var options = new StartOptions
             {
                 ServerFactory = "Nowin",
-                Port = config.Properties.ContainsKey("Port") ? int.Parse(config.Properties["Port"]) : 8080,
+                Port = 8081,
             };
 
-            var username = config.Properties.ContainsKey("Username") ? config.Properties["Username"] : null;
-            var password = config.Properties.ContainsKey("Password") ? config.Properties["Password"] : null;
-            try
-            {
-                host = WebApp.Start(options, app => new WebServer(router, username, password).Configuration(app));
-            }
-            catch (Exception ex)
-            {
-                this.logger.Error(10001, ex.ToString());
-            }
+            // setup router and controller for REST calls (mainly static file serving)
+            var router = new Router();
+            var controller = new Controller(router);
 
-            this.logger.Verbose($"Chirper listening on {options.Port}");
+            // create a web server that will relay its requests to the controller and the WebSocketHandler
+            var webserver = new WebServer(router);
 
-
+            // Start the Owin server and configure our web server with it
+            host = WebApp.Start(options, app => webserver.Configuration(app));
+            
             return TaskDone.Done;
         }
     }
